@@ -1,0 +1,16 @@
+configs:
+  resources:
+    - region_id: "200000001852"
+      az_name: "cn-huabei2-tj1A-public-ctcloud"
+      device_type: "physical.lcas910b.2xlarge11"
+      info: "华北2-910B裸金属"
+    #- region_id: "200000003331"
+    #  az_name: "cn-bj-bj9-1a-public-ctcloud"
+    #  device_type: "physical.h8ns.6xlarge28"
+    #  info: "北京9-H800裸金属"
+  mails:
+    - "64264368@qq.com"
+    - "1127159704@qq.com"
+    - "353063035@qq.com"
+    - "362487207@qq.com"
+    - "1298531085@qq.com"
