@@ -2,15 +2,17 @@ import os
 import smtplib
 from logger_utils import get_logger
 from logging.handlers import TimedRotatingFileHandler
+from dotenv import load_dotenv
 from email.mime.text import MIMEText
 from email.header import Header
 from email.utils import formataddr
 
+load_dotenv()
 # ========== 邮件配置 ==========
-SMTP_SERVER = "smtp.chinatelecom.cn"
-SMTP_PORT = 465
-SENDER_EMAIL = "chengs4@chinatelecom.cn"
-SENDER_PASSWORD = "9fK#rW=MC333$X!g"
+SMTP_SERVER = os.getenv("SMTP_SERVER")
+SMTP_PORT = os.getenv("SMTP_PORT")
+SENDER_EMAIL = os.getenv("SENDER_EMAIL")
+SENDER_PASSWORD = os.getenv("SENDER_PASSWORD")
 
 # ========== 日志配置 =========
 logger = get_logger("EBMMonitor")

@@ -1,3 +1,4 @@
+import os
 import uuid
 import json
 import hmac
@@ -9,18 +10,13 @@ import configparser
 import urllib.parse
 from urllib.parse import quote
 from enum import Enum
+from dotenv import load_dotenv
 
-# Configs
-#zhangpeng
-ak = "d67caad761244673bfdead8a5300125e"
-sk = "b8312fef99b74778b31e7eb9c436a78a"
+
+load_dotenv()
+ak = os.getenv("AK")
+sk = os.getenv("SK")
 debug = False
-#zgcxy
-#ak = 'e9f467655cad41b39a06566245941b5e'
-#sk = '313c0a9c02f64afaaf7a066f48b2bd47'
-#sina
-#ak = "0212931a4d9e4449bcfbff5ae6eb812b"
-#sk = "9d6fb4fe404c4a1385377d23f6d5772b"
 
 class REQ(Enum):
     GET = 'GET'

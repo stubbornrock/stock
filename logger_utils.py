@@ -1,7 +1,7 @@
 import logging
 from logging.handlers import TimedRotatingFileHandler
 
-LOG_FILE = "ebm_monitor.log"
+LOG_FILE = "monitor.log"
 
 def get_logger(name="EBMMonitor", log_file=LOG_FILE):
     logger = logging.getLogger(name)
