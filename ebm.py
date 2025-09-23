@@ -75,15 +75,40 @@ def monitor_stock(stock, receiver_emails):
     logger.info(f"Monitoring {resource_name}-{device_type} in {region_id}, {az_name}")
 
     # 初始化变量
-    last_available_stock = -1
-    last_api_ok = -1
+    last_available_stock = -1 #库存初始化
+    last_api_ok = True
+
+    # API错误计数
+    ERROR_THRESHOLD = 3
+    api_error_count = 0
+
     if not region_id or not az_name or not device_type or not resource_name:
         logger.error("Invalid stock data. Please check the input data.")
         return
+
     while True:
         now = datetime.now()
         current_stock = get_ebm_stocks(region_id, az_name, device_type)
         if current_stock is not None:
+            # API调用成功
+
+            # 如果之前是失败的，则发送恢复邮件
+            if not last_api_ok: 
+                title = f"【恢复】{resource_name}库存查询服务恢复!"
+                content = (
+                    f"亲爱的同事：\n\n"
+                    f"{resource_name}库存查询服务已从故障中恢复。请继续关注。\n\n"
+                    f"⏰ 恢复时间: {now.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+                    f"此致，\n库存监控系统"
+                )
+                send_email(receiver_emails, resource_name, title, content)
+                logger.info("Email: 恢复邮件发送成功！")
+
+            # 成功，重置错误计数
+            api_error_count = 0
+            last_api_ok = True
+
+            # 获取可用库存
             available = current_stock.get("available")
             logger.info(f"Current stock data: {current_stock}")
             if available != last_available_stock:
@@ -101,23 +126,37 @@ def monitor_stock(stock, receiver_emails):
                     logger.info(f"Email: 库存监控进程启动成功，不发送邮件！")
                 else:
                     send_email(receiver_emails, resource_name, title, content)
-                    logger.info(f"Notification email sent: {content}")
+                    logger.info(f"Email: 库存变化邮件发送成功： {content}")
                 last_available_stock = available
-                last_api_ok = 1
             else:
+                # 没有变化
                 pass
         else:
-            title = f"【异常】{resource_name}库存查询失败!"
-            content = (
-                f"亲爱的同事:\n\n"
-                f"{resource_name}库存查询失败，可能是 API 服务异常或网络故障，请尽快检查。\n\n"
-                f"⏰ 失败时间: {now.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
-                f"此致，\n库存监控系统"
-            )
-            # 发送邮件, EBM库存查询失败了
-            if last_api_ok == 1:
-                send_email(receiver_emails, resource_name, title, content)
-            logger.error("Error email sent due to stock API failure.")
+            # API调用失败
+            api_error_count += 1
+            logger.error(f"Stock API error count: {api_error_count}")
+
+            if api_error_count == ERROR_THRESHOLD:
+                logger.error(f"Stock API error count exceeded threshold ({ERROR_THRESHOLD}). Exiting...")
+                title = f"【异常】{resource_name} 库存查询服务失败!"
+                content = (
+                    f"亲爱的同事:\n\n"
+                    f"{resource_name}库存查询失败，可能是 API 服务异常或网络故障，已经连续失败{ERROR_THRESHOLD}次 请尽快检查。\n\n"
+                    f"⏰ 失败时间: {now.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+                    f"此致，\n库存监控系统"
+                )
+                # 发送邮件, EBM库存查询失败了
+                if last_api_ok == True:
+                    send_email(receiver_emails, resource_name, title, content)
+                logger.error(f"Email: sent due to stock API failure.")
+            elif api_error_count > ERROR_THRESHOLD:
+                # API持续错误，持续失败，不再重复发送告警，只记录日志
+                logger.error(f"Stock API error count: {api_error_count}")
+            else:
+                # 错误计数小于阈值，不发送邮件
+                pass
+            last_api_ok = False
+            last_available_stock = -1
         #time.sleep(MONITOR_INTERVAL_SECONDS)
         time.sleep(random.uniform(MONITOR_INTERVAL_SECONDS*0.5, MONITOR_INTERVAL_SECONDS*1.5))
 
