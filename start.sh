@@ -4,7 +4,7 @@ SESSION_BACKEND="backend"
 SESSION_BACKEND_COMMAND="cd /root/apps/; python ebm.py"
 
 #
-rm -rf *.log
+rm -rf *.log*
 # 检查 tmux session 是否存在
 tmux has-session -t "$SESSION_BACKEND" 2>/dev/null
 

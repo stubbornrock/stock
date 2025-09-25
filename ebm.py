@@ -149,14 +149,15 @@ def monitor_stock(stock, receiver_emails):
                 if last_api_ok == True:
                     send_email(receiver_emails, resource_name, title, content)
                 logger.error(f"Email: sent due to stock API failure.")
+                last_api_ok = False
             elif api_error_count > ERROR_THRESHOLD:
                 # API持续错误，持续失败，不再重复发送告警，只记录日志
                 logger.error(f"Stock API error count: {api_error_count}")
             else:
                 # 错误计数小于阈值，不发送邮件
                 pass
-            last_api_ok = False
             last_available_stock = -1
+
         #time.sleep(MONITOR_INTERVAL_SECONDS)
         time.sleep(random.uniform(MONITOR_INTERVAL_SECONDS*0.5, MONITOR_INTERVAL_SECONDS*1.5))
 
